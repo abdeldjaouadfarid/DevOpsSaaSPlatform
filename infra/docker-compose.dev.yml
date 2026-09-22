@@ -1,0 +1,24 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: devops_saas_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: devops
+      POSTGRES_PASSWORD: devops
+      POSTGRES_DB: devops_saas
+    ports:
+      # host:container — host 5434 avoids clashing with a system postgres on 5432
+      # and other project containers (e.g. clipforge-postgres) already on 5433
+      - "5434:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U devops -d devops_saas"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  postgres_data:
+    name: devops_saas_postgres_data

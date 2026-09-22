@@ -1,0 +1,39 @@
+# deps
+node_modules/
+.pnpm-store/
+
+# build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# env
+.env
+.env.local
+.env.*.local
+
+# logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# editors
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# test coverage
+coverage/
+.nyc_output/
+
+# prisma generated client (regenerated on install)
+prisma/generated/
+
+# docker volumes
+infra/data/
+
+# scratch
+tmp/
+scratchpad/
