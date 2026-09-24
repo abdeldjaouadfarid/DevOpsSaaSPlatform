@@ -1,3 +1,7 @@
+// Response DTOs for the /projects endpoints.
+// DeploymentSummaryDto is the trimmed view we inline on GET /projects/:id
+// (the full DeploymentResponseDto with logs lives in the deployments
+// module — logs can be large so we keep them off the project detail view).
 import { ApiProperty } from '@nestjs/swagger';
 import { DeploymentStatus } from '@prisma/client';
 

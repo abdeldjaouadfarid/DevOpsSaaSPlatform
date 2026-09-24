@@ -23,24 +23,40 @@ describe('AuthService', () => {
       prisma.user.create.mockResolvedValue({
         id: 'user-1',
         email: 'a@b.com',
+        firstName: 'Jawad',
+        lastName: 'Farid',
         createdAt: new Date('2026-01-01'),
       } as never);
 
-      const result = await service.register('a@b.com', 'password12');
+      const result = await service.register({
+        email: 'a@b.com',
+        password: 'password12',
+        firstName: 'Jawad',
+        lastName: 'Farid',
+      });
 
       expect(prisma.user.create).toHaveBeenCalledTimes(1);
-      const createArgs = prisma.user.create.mock.calls[0][0] as { data: { passwordHash: string } };
+      const createArgs = prisma.user.create.mock.calls[0][0] as {
+        data: { passwordHash: string; firstName: string; lastName: string };
+      };
       expect(createArgs.data.passwordHash).not.toBe('password12');
       expect(await bcrypt.compare('password12', createArgs.data.passwordHash)).toBe(true);
+      expect(createArgs.data.firstName).toBe('Jawad');
+      expect(createArgs.data.lastName).toBe('Farid');
       expect(result.accessToken).toBe('signed.jwt.token');
       expect(result.user.email).toBe('a@b.com');
     });
 
     it('rejects duplicate emails with ConflictException', async () => {
       prisma.user.findUnique.mockResolvedValue({ id: 'x' } as never);
-      await expect(service.register('a@b.com', 'password12')).rejects.toBeInstanceOf(
-        ConflictException,
-      );
+      await expect(
+        service.register({
+          email: 'a@b.com',
+          password: 'password12',
+          firstName: 'Jawad',
+          lastName: 'Farid',
+        }),
+      ).rejects.toBeInstanceOf(ConflictException);
       expect(prisma.user.create).not.toHaveBeenCalled();
     });
   });
@@ -51,6 +67,8 @@ describe('AuthService', () => {
       prisma.user.findUnique.mockResolvedValue({
         id: 'user-1',
         email: 'a@b.com',
+        firstName: 'Jawad',
+        lastName: 'Farid',
         passwordHash,
         createdAt: new Date('2026-01-01'),
       } as never);
@@ -58,6 +76,7 @@ describe('AuthService', () => {
       const result = await service.login('a@b.com', 'password12');
       expect(result.accessToken).toBe('signed.jwt.token');
       expect(result.user.id).toBe('user-1');
+      expect(result.user.firstName).toBe('Jawad');
     });
 
     it('rejects unknown email with generic UnauthorizedException', async () => {
@@ -69,12 +88,6 @@ describe('AuthService', () => {
 
     it('rejects wrong password with the same generic message as unknown email', async () => {
       const passwordHash = await bcrypt.hash('correct-password', 12);
-      prisma.user.findUnique.mockResolvedValue({
-        id: 'user-1',
-        email: 'a@b.com',
-        passwordHash,
-      } as never);
-
       let unknownEmailMessage: string | undefined;
       let wrongPasswordMessage: string | undefined;
 
@@ -83,6 +96,13 @@ describe('AuthService', () => {
         unknownEmailMessage = e.message;
       });
 
+      prisma.user.findUnique.mockResolvedValueOnce({
+        id: 'user-1',
+        email: 'a@b.com',
+        firstName: 'Jawad',
+        lastName: 'Farid',
+        passwordHash,
+      } as never);
       await service.login('a@b.com', 'wrong-password').catch((e: UnauthorizedException) => {
         wrongPasswordMessage = e.message;
       });

@@ -1,3 +1,5 @@
+// AuthModule — wires up Passport, JwtModule (async so we can read the
+// secret from ConfigService), the controller, service, and strategy.
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
@@ -8,7 +10,10 @@ import { JwtStrategy } from './jwt.strategy';
 
 @Module({
   imports: [
+    // Declares 'jwt' as the default Passport strategy for AuthGuard('jwt').
     PassportModule.register({ defaultStrategy: 'jwt' }),
+    // Async factory so JWT_SECRET / JWT_EXPIRES_IN come from validated
+    // config, not from process.env directly.
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -20,6 +25,8 @@ import { JwtStrategy } from './jwt.strategy';
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],
+  // Export AuthService so future modules (webhook handler, admin) can
+  // call it without going through HTTP.
   exports: [AuthService],
 })
 export class AuthModule {}

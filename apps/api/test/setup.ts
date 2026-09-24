@@ -10,3 +10,7 @@ process.env.JWT_SECRET =
 process.env.JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN ?? '15m';
 process.env.PORT = process.env.PORT ?? '0';
 process.env.CORS_ORIGIN = process.env.CORS_ORIGIN ?? 'http://localhost:5173';
+process.env.REDIS_HOST = process.env.REDIS_HOST ?? 'localhost';
+process.env.REDIS_PORT = process.env.REDIS_PORT ?? '6379';
+// Keep Bull Board off during e2e — it mounts routes on the Express app and we don't need it.
+process.env.BULL_BOARD_ENABLED = 'false';

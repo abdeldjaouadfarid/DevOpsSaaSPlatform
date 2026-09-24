@@ -1,3 +1,6 @@
+// ProjectsController — HTTP surface for CRUD on Project rows.
+// Every route is authenticated (bearer JWT) and every operation is
+// scoped to the caller via ProjectsService.
 import {
   Body,
   Controller,
@@ -30,6 +33,7 @@ import { ProjectsService } from './projects.service';
 export class ProjectsController {
   constructor(private readonly projects: ProjectsService) {}
 
+  /** GET /projects — list the caller's projects (newest first). */
   @Get()
   @ApiOperation({ summary: 'List projects owned by the current user' })
   @ApiOkResponse({ type: [ProjectResponseDto] })
@@ -37,6 +41,7 @@ export class ProjectsController {
     return this.projects.list(user.id);
   }
 
+  /** POST /projects — create a new project owned by the caller. */
   @Post()
   @ApiOperation({ summary: 'Create a project' })
   @ApiCreatedResponse({ type: ProjectResponseDto })
@@ -44,6 +49,11 @@ export class ProjectsController {
     return this.projects.create(user.id, dto);
   }
 
+  /**
+   * GET /projects/:id — fetch one project plus its last 10 deployments.
+   * ParseUUIDPipe rejects malformed ids at the pipe level so the
+   * service never sees garbage input.
+   */
   @Get(':id')
   @ApiOperation({ summary: 'Get one project (with last 10 deployments)' })
   @ApiOkResponse({ type: ProjectResponseDto })
@@ -51,6 +61,7 @@ export class ProjectsController {
     return this.projects.findOne(user.id, id);
   }
 
+  /** PATCH /projects/:id — partial update (name, repoUrl). */
   @Patch(':id')
   @ApiOperation({ summary: 'Update a project' })
   @ApiOkResponse({ type: ProjectResponseDto })
@@ -62,6 +73,10 @@ export class ProjectsController {
     return this.projects.update(user.id, id, dto);
   }
 
+  /**
+   * DELETE /projects/:id — 204 on success. Cascade removes deployments
+   * per the Prisma schema; no soft-delete.
+   */
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete a project' })

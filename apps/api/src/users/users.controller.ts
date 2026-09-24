@@ -1,3 +1,6 @@
+// UsersController — endpoints related to the currently-authenticated user.
+// Today only exposes /users/me, but this is where things like PATCH
+// /users/me or DELETE /users/me will land.
 import { Controller, Get } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, AuthenticatedUser } from '../common/decorators/current-user.decorator';
@@ -10,6 +13,11 @@ import { UsersService } from './users.service';
 export class UsersController {
   constructor(private readonly users: UsersService) {}
 
+  /**
+   * GET /users/me
+   * Return the profile of whoever holds the presented JWT. Convenient
+   * for the dashboard to render "logged in as X".
+   */
   @Get('me')
   @ApiOperation({ summary: 'Get the currently authenticated user' })
   @ApiOkResponse({ type: UserResponseDto })

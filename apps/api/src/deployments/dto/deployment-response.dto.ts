@@ -1,3 +1,7 @@
+// Response shape for the deployments endpoints.
+// Includes `logs` because the deployment detail view is where you'd
+// want to read them; the project summary view uses the smaller
+// DeploymentSummaryDto that omits logs.
 import { ApiProperty } from '@nestjs/swagger';
 import { DeploymentStatus } from '@prisma/client';
 
